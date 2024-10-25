@@ -22,22 +22,6 @@ jobs:
           ref: "master"
           repository: "jaywcjlove/linux-command"
 
-      - name: Generate Contributors Images
-        uses: jaywcjlove/github-action-contributors@main
-        id: contributors
-        with:
-          filter-author: (renovate\[bot\]|renovate-bot|@github-actions-bot|dependabot\[bot\])
-          avatarSize: 42
-
-      - name: Modify contributors.ejs
-        uses: jaywcjlove/github-action-modify-file-content@main
-        with:
-          path: template/contributors.ejs
-          openDelimiter: "<!--AUTO_GENERATED_PLEASE_DONT_DELETE_IT-->"
-          closeDelimiter: "<!--AUTO_GENERATED_PLEASE_DONT_DELETE_IT-END-->"
-          body: |
-            ${{steps.contributors.outputs.htmlList}}
-
       - name: ♻️ 编译静态文件
         run: |
           npm install
