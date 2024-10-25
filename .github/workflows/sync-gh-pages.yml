@@ -29,6 +29,10 @@ jobs:
         run: |
           git checkout gh-pages || git checkout -b gh-pages
           git pull upstream gh-pages
+      
+      - name: Increase Git buffer size
+        run: |
+          git config http.postBuffer 524288000  # 将 buffer 增加到 500MB
 
       - name: Add or update .env file
         run: |
