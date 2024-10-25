@@ -22,6 +22,13 @@ jobs:
           ref: "master"
           repository: "jaywcjlove/linux-command"
 
+      - name: Generate Contributors Images
+        uses: jaywcjlove/github-action-contributors@main
+        id: contributors
+        with:
+          filter-author: (renovate\[bot\]|renovate-bot|@github-actions-bot|dependabot\[bot\])
+          avatarSize: 42
+
       - name: ♻️ 编译静态文件
         run: |
           npm install
