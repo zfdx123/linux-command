@@ -1,16 +1,16 @@
 name: 每8个小时更新一次linux-command
 on:
   schedule:
-    - cron: '21 */8 * * *' # 定时任务
-  workflow_dispatch:       # 手动运行
+    - cron: "21 */8 * * *" # 定时任务
+  workflow_dispatch: # 手动运行
 
 env: # 设置环境变量
   TZ: Asia/Shanghai # 时区（设置时区可使页面中的`最近更新时间`使用时区时间）
 
 permissions:
-  contents: write  # 允许操作内容
-  id-token: write  # 允许生成 ID token
-  pages: write     # 允许操作 GitHub Pages
+  contents: write # 允许操作内容
+  id-token: write # 允许生成 ID token
+  pages: write # 允许操作 GitHub Pages
 
 jobs:
   build: # 自定义名称
@@ -19,18 +19,39 @@ jobs:
       - name: 🚜 拉取最新代码
         uses: actions/checkout@v4
         with:
-          ref: 'master'
-          repository: 'jaywcjlove/linux-command'
+          ref: "master"
+          repository: "jaywcjlove/linux-command"
+
+      - name: Generate Contributors Images
+        uses: jaywcjlove/github-action-contributors@main
+        id: contributors
+        with:
+          filter-author: (renovate\[bot\]|renovate-bot|@github-actions-bot|dependabot\[bot\])
+          avatarSize: 42
+
+      - name: Modify contributors.ejs
+        uses: jaywcjlove/github-action-modify-file-content@main
+        with:
+          path: template/contributors.ejs
+          openDelimiter: "<!--AUTO_GENERATED_PLEASE_DONT_DELETE_IT-->"
+          closeDelimiter: "<!--AUTO_GENERATED_PLEASE_DONT_DELETE_IT-END-->"
+          body: |
+            ${{steps.contributors.outputs.htmlList}}
 
       - name: ♻️ 编译静态文件
         run: |
           npm install
-          npm run build
+          npm run dash
+          cp CONTRIBUTORS.svg .deploy
+
+      - name: Update Dash Feed
+        run: |
+          echo "<entry><version>$(date)</version><url>linux-command.docset.tgz</url></entry>" > .deploy/linux-command-docset.xml
 
       - name: 🚀 上传静态文件到 GitHub Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist' # 项目打包后的静态文件路径
+          path: "./.deploy" # 项目打包后的静态文件路径
 
       - name: 📄 发布到 GitHub Pages
         uses: actions/deploy-pages@v4
